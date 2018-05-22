@@ -1,25 +1,20 @@
-//Graph ADT interface for Ass2 (COMP2521)
+// Graph ADT interface for Ass2 (COMP2521)
 #include <stdbool.h>
+#ifndef _CS2521_GRAPH_H
+#define _CS2521_GRAPH_H
+
+typedef struct GraphRep *Graph;
 
 // vertices are ints
 typedef int Vertex;
 
-
 typedef struct _adjListNode {
-    Vertex         w;
-    int         weight;
-    struct _adjListNode *next;
-}adjListNode;
+   Vertex         w;
+   int         weight;
+   struct _adjListNode *next;
+} adjListNode;
 
 typedef adjListNode* AdjList;
-
-typedef struct GraphRep{
-    int nV;
-    int nE;
-    AdjList edges*;
-}GraphRep;
-
-typedef struct GraphRep *Graph;
 
 Graph newGraph(int noNodes);
 
@@ -35,10 +30,12 @@ int  numVerticies(Graph g);
 **/
 AdjList outIncident(Graph g, Vertex v);
 /*
-* Returns a list of adjacent vertices
-* on incoming edges from a given vertex.
+ * Returns a list of adjacent vertices
+ * on incoming edges from a given vertex.
 **/
 AdjList inIncident(Graph g, Vertex v);
 
 void  showGraph(Graph g);
 void  freeGraph(Graph g);
+
+#endif
