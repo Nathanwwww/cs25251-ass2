@@ -11,12 +11,12 @@ typedef struct _adjListNode {
     struct _adjListNode *next;
 }adjListNode;
 
-typedef adjListNode* AdjList;
+typedef adjListNode *AdjList;
 
 typedef struct GraphRep{
     int nV;
     int nE;
-    AdjList edges*;
+    AdjList *edges;
 }GraphRep;
 
 typedef struct GraphRep *Graph;

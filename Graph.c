@@ -1,80 +1,155 @@
-//cs2521 ass
-
-
-//===========================================================================
-//function need to be implemented 
+//Graph ADT interface for Ass2(comp2521)
+#include "Graph.h"
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+//============================================================================
+//implement function
 Graph newGraph(int noNodes);
 void  insertEdge(Graph g, Vertex src, Vertex dest, int weight);
 void  removeEdge(Graph g, Vertex src, Vertex dest);
 bool  adjacent(Graph g, Vertex src, Vertex dest);
-int  numVerticies(Graph g);
-//===========================================================================
+int   numVerticies(Graph g);
+void  showGraph(Graph g);
+void  freeGraph(Graph g);
+AdjList outIncident(Graph g, Vertex v);
+AdjList inIncident(Graph g, Vertex v);
+//============================================================================
+//personal function
+
+//============================================================================
 Graph newGraph(int noNodes){
-    assert (nV >= 0);
+    //debug
+    assert(noNodes >= 0);
 
-    Graph new = malloc(sizeof(Graph));
-    assert(new != NULL);
-    new->nV = noNodes;
-    new->nE = 0;
-
-    new->edges = malloc(sizeof(AdjList)*noNodes);
-    assert(new->edges != NULL);
-    for(int i = 0;i < noNodes;i++){
-        new->edges[i] = NULL;
+    Graph g = malloc(sizeof(Graph));
+    g->nV = noNodes;
+    g->nE = 0;
+    g->edges = malloc(sizeof(AdjList)*noNodes);
+    for(int i = 0;i < g->nV;i++){
+        g->edges[i] = NULL;
     }
-    return new;
+    return g;
 }
-void insertEdge(Graph g, Vertax src, Vertax dest, int weight){
+
+void insertEdge(Graph g, Vertex src, Vertex dest, int weight){
+    //debug
+    assert(g != NULL);
+
+    //init 
+    AdjList new = malloc(sizeof(AdjList));
+    AdjList curr = g->edges[src];
+    //init new edge
+    new->w = dest;
+    new->weight = weight;
+    new->next = NULL;
+    
+    if (curr == NULL){
+        curr = new;
+    }else if(!adjacent(g,src,dest)){
+        while(curr->next != NULL){
+            curr = curr->next;
+        }
+        curr->next = new;   
+    }else{
+        printf("Fail to insert edge\n");
+        exit(1);
+    }
+}
+
+void removeEdge(Graph g, Vertex src, Vertex dest){
     //debug
     assert(g != NULL);
     
-    //init var
-    AdjList start = malloc(sizeof(AdjList));
-    AdjList end = malloc(sizeof(AdjList));
-
-    //function
-    //create edges
-    start->w = src;
-    start->weight = weight;
-    start->next = end;
-
-    end->w = dest;
-    end->weight = weight;
-    end->next = NULL;
+    //init
+    AdjList curr = g->edges[src];
+    AdjList next;
     
-    //insert edge into array
-    g->edges[src] = start;
-    g->edges[dest] = end;
-    g->nE++;
-}
-
-void removeEdges(Graph g, Vertax src, Vertax dest){
-    //debug 
-    assert(g != NULL);
-    if(g->edges[src] == NULL || g->edges[dest] == NULL){
-        fprintf(stderr,"Cannot find edge");
-        exit(1);
-    }
-
-    //remove edge
-    free(g->graph[src]);
-    g->graph[src] = NULL;
-
-    free(g->graph[dest]);
-    g->graph[dest] = NULL;
-
+   while(curr != NULL){
+       if(curr->w == dest){
+           next = curr->next;
+           free(curr);
+       }
+       curr = curr->next;
+   }
 }
 
 bool adjacent(Graph g, Vertex src, Vertex dest){
+    AdjList curr = g->edges[src];
+    while(curr != NULL){
+        if(curr->w == dest) return 1;
+        curr = curr->next;
+    }
+    return 0;
+}
+
+int numVerticies(Graph g){
+    return g->nV;
+}
+AdjList outIncident(Graph g, Vertex v){
+    //debug
+    assert(g != NULL);
+
+    AdjList list[g->nV];
+    int index = 0;
+
+    AdjList curr = g->edges[v];
+    while(curr != NULL){
+        list[index] = curr;
+        index++;
+        curr = curr->next;
+    }
+    return list;
+}
+AdjList inIncident(Graph g, Vertex v){
+    //debug
     assert(g != NULL);
     
-    AdjList next;
-    next = g->edges[src]->next;
-    if(next->nV == dest){
-        return True;
-    }else{
-        return False;
+    int index = 0;
+    AdjList list[g->nV];
+    
+    for(int i = 0;i < g->nV;i++){
+        AdjList curr = g->edges[i];
+        while(curr != NULL){
+            if(curr->w == v){
+                list[index] = curr;
+                index++;
+            }
+            curr = curr->next;
+        }
     }
-} 
+    return list;
+}
+void  showGraph(Graph g){
+    assert(g != NULL);
+
+    printf("Number of vertices: %d\n", g->nV);
+    printf("Number of edges: %d\n", g->nE);
+    for (int i = 0; i < g->nV; i++) {
+        AdjList curr = g->edges[i];
+        while(curr != NULL){
+            printf("%d ----> %d(weight: %d)\n",i,curr->w,curr->weight);
+            curr = curr->next;
+        }
+    }
+}
+void  freeGraph(Graph g){
+    assert(g != NULL);
+    
+    for (int i = 0; i < g->nV; i++){
+        AdjList curr = g->edges[i];
+        AdjList tmp;
+        while(curr != NULL){
+            tmp = curr;
+            curr = curr->next;
+            free(tmp);
+        }
+    }
+   free(g);
+}
+
+//=============================================================================================
+//personal function
+
 
 
