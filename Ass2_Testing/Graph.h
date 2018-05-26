@@ -14,7 +14,7 @@ typedef struct _adjListNode {
    struct _adjListNode *next;
 } adjListNode;
 
-typedef adjListNode* AdjList;
+typedef adjListNode *AdjList;
 
 Graph newGraph(int noNodes);
 
