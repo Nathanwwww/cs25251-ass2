@@ -14,7 +14,7 @@ void  freeShortestPaths(ShortestPaths);
 //----------------------------------------------------------------------------
 //personal function
 static ShortestPaths initPath(Graph g, Vertex v);
-static void insertNode(ShortestPaths path,Vertex w,Vertex v);
+//static void insertNode(ShortestPaths path,Vertex w,Vertex v);
 //============================================================================
 ShortestPaths dijkstra(Graph g, Vertex v) {
 	//debug
@@ -23,33 +23,56 @@ ShortestPaths dijkstra(Graph g, Vertex v) {
 	//init
 	ShortestPaths path = initPath(g,v);
 	PQ pq = newPQ();
+	int visted[numVerticies(g)];
+	for(int i = 0;i < numVerticies(g);i++){
+		visted[i] = 0;
+	}
+	//step 1: create a start node and insert it into heap
+	//value = 0;which means it is a start node
 	ItemPQ src;
-	//insert src
 	src.key = v;
 	src.value = 0;
+
 	addPQ(pq,src);
-
+	
+	
 	while(!PQEmpty(pq)){
+		//if a node has been visted , do not add it into heap
 		ItemPQ curr = dequeuePQ(pq);
-		int node = curr.key;
-		AdjList list = outIncident(g,node);
-
-		while(list != NULL){
-			ItemPQ cur;
-			cur.key = list->w;
-			cur.value = list->weight;
-
-			int dist = list->weight + path.dist[node];
-			if(dist < path.dist[list->w]){
-				path.dist[list->w] = dist;
-				insertNode(path,list->w,node);	
-			}
-			addPQ(pq,cur);
-			list = list->next;
+		int currVertex = curr.key;
+		AdjList edgeList = outIncident(g,currVertex);
+		if(visted[currVertex] == 0){
+			visted[currVertex] = 1;		//set to 1: this node has been visted 
+		}else{
+			continue;					//if this node has been visted, then jump this heap to next unvisted node
 		}
-			
-	}
 
+		while(edgeList != NULL){
+			//if v has not been visted , add it to heap
+			ItemPQ edges;
+			edges.key = edgeList->w;
+			edges.value = edgeList->weight;
+
+			addPQ(pq,edges); // add it to heap
+
+			if(edgeList->weight + path.dist[currVertex] < path.dist[edgeList->w]){
+				//swap
+				PredNode *node = malloc(sizeof(PredNode));
+				node->v = currVertex;
+				node->next = NULL;
+				
+				path.dist[edgeList->w] = edgeList->weight + path.dist[currVertex];
+				path.pred[edgeList->w] = node;
+			}
+			
+			edgeList = edgeList->next;
+		}
+	}
+	for(int i = 0; i < path.noNodes; i++){
+		if(path.dist[i] == INF){
+			path.dist[i] = 0;
+		}
+	}
 	return path;
 }
 
@@ -60,16 +83,11 @@ void showShortestPaths(ShortestPaths paths) {
 
 void  freeShortestPaths(ShortestPaths paths) {
 	free(paths.dist);
-	for(int i = 0;paths.pred[i] != NULL;i++){
-		PredNode *curr = paths.pred[i];
-		PredNode *pre;
-		while(curr != NULL){
-			pre = curr;
-			curr = curr->next;
-			free(pre);
-		}
+	for(int i = 0;i < paths.noNodes;i++){
+		free(paths.pred[i]);
 	}
 	free(paths.pred);
+	
 }
 
 //===============================================================================
@@ -83,26 +101,13 @@ static ShortestPaths initPath(Graph g, Vertex v){
 	for(int i = 0;i < new.noNodes;i++){
 		if(i == v){
 			new.dist[i] = 0;
+		}else{
+			new.dist[i] = INF; 
 		}
-		new.dist[i] = INF; 
 		new.pred[i] = NULL;
 	}
 	return new;
 }
 
-static void insertNode(ShortestPaths path,Vertex w,Vertex v){
-	if(path.pred[w] == NULL){
-		path.pred[w]->v = v;
-		path.pred[w]->next = NULL;
-	}else{
-		PredNode *new = malloc(sizeof(PredNode));
-		PredNode *curr = path.pred[w];
-		new->v = v;
-		new->next = NULL;
-		while(curr->next != NULL){
-			curr = curr->next;
-		}
-		curr->next = new;
-	}
-}
+
 

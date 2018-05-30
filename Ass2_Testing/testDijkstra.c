@@ -48,6 +48,8 @@ Graph readGraph(char* file) {
 		insertEdge(g,nums[i][0],nums[i][1],nums[i][2]);
 		i++;
 	}
+	//test
+	showGraph(g);
 	for(i=0;i<lines;i++) free(nums[i]);
 	free(nums);
 	return g;

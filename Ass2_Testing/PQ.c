@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+
+#define INF 99999
 //=====================================================================================
 PQ newPQ();
 int PQEmpty(PQ p);
@@ -27,19 +29,22 @@ PQ newPQ() {
 	PQ new;
 	new = malloc(sizeof(PQ));
 	assert(new != NULL);
-	new->capacity = 4096;
+	new->capacity = 1000*sizeof(PQ);
 	new->size = 0;
 	new->index = malloc(sizeof(ItemPQ)*new->capacity);//store element according to order of key
 	new->heap = malloc(sizeof(ItemPQ)*new->capacity);
 	for(int i = 0; i < new->capacity;i++){
 		new->index[i] = NULL;
+		new->heap[i].key = i;
+		new->heap[i].value = INF;
 	}
+	
 	return new;
 
 }
 
 int PQEmpty(PQ pq) {
-	if(pq->heap == NULL){
+	if(pq->size == 0){
 		return 1;
 	}
 	return 0;
@@ -61,14 +66,15 @@ ItemPQ dequeuePQ(PQ pq) {
 
 	//init
 	ItemPQ min = pq->heap[0];
-	if(pq->heap == NULL){
-		fprintf(stderr,"heap is not exist\n");
-		exit(1);
-	}
-	int lastNode = pq->size - 1;
-	//remove heap[0],move heap[last] to heap[0],resort heap[]
-	pq->heap[0] = pq->heap[lastNode];
-	pq->size--;
+	ItemPQ tmp;
+	//init pq->heap[0] and pq->index[]
+	pq->heap[0].value = INF;
+	pq->index[min.key] = NULL;
+	pq->heap[0].key = -1;
+	tmp = pq->heap[pq->size-1];
+	pq->heap[pq->size-1] = pq->heap[0];
+	pq->heap[0] = tmp;
+	pq->size = pq->size - 1;
 	sortHeap(pq);
 	return min;
 }
@@ -77,7 +83,7 @@ void updatePQ(PQ pq, ItemPQ element) {
 	//---
 	assert(pq != NULL);
 
-	int key = element.key;
+	int key = element.key; 
 	if(pq->index[key] == NULL){
 		return;
 	}
@@ -86,33 +92,38 @@ void updatePQ(PQ pq, ItemPQ element) {
 
 void  showPQ(PQ pq) {
 	int size = pq->size;
-	for(int i = 0;i < size;i++){
+	printf("===============\n");
+	printf("size: %d\n",size);
+	for(int i = 0;pq->heap[i].value != INF ;i++){
 		printf("key: %d value: %d\n",pq->heap[i].key,pq->heap[i].value);
 	}
+	printf("================\n");
 }
 
 void  freePQ(PQ pq) {
 	free(pq->heap);
+	for(int i = 0; i < pq->capacity;i++){
+		free(pq->index[i]);
+		pq->index[i] = NULL;
+	}
 	free(pq->index);
 	free(pq);
 }
 //------------------------------------------------------------------------
 static void initArray(PQ pq,ItemPQ element){
-	int i = element.key;
-	int h = pq->size;
-	if(pq->index[i] != NULL){
-		pq->index[i]->value = element.value;
-		return;
-	}
-	pq->index[i] = &element;
-	pq->heap[h] = element;
+	int index = pq->size;
+	int key = element.key;
+
+	pq->heap[index] = element;
+	pq->index[key] = &element;
 	pq->size++;
 }
 
 static void sortHeap(PQ pq){
-	int index = pq->size;
+	int index = pq->size - 1;
 	ItemPQ tmp;
 	while((index-1)/2 >= 0){
+		//if parent node value is greater than child node ,swap
 		if(pq->heap[(index-1)/2].value > pq->heap[index].value){
 			tmp = pq->heap[index];
 			pq->heap[index] = pq->heap[(index-1)/2];

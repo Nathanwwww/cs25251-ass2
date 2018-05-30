@@ -1,7 +1,7 @@
 # Makefile for Ass2
 
 CC = gcc
-CFLAGS =  -Wall -std=c11 -Werror -g
+CFLAGS =  -Wall -std=c11 -Werror -g 
 AR = ar
 objs = Graph.o GraphVis.o CentralityMeasures.o PQ.o Dijkstra.o
 

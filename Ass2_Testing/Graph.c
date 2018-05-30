@@ -29,7 +29,7 @@ Graph newGraph(int noNodes) {
     assert(noNodes >= 0);
 
     Graph g = malloc(sizeof(Graph));
-    g->nV = noNodes;
+    g->nV = noNodes+1;
     g->nE = 0;
     g->edges = malloc(sizeof(AdjList)*noNodes);
     for(int i = 0;i < g->nV;i++){
@@ -66,6 +66,7 @@ void  insertEdge(Graph g, Vertex src, Vertex dest, int weight) {
         printf("Fail to insert edge\n");
         exit(1);
     }
+    g->nE++;
 }
 
 void  removeEdge(Graph g, Vertex src, Vertex dest) {
@@ -83,6 +84,7 @@ void  removeEdge(Graph g, Vertex src, Vertex dest) {
        	}
        	curr = curr->next;
    	}
+    free(g->edges[src]);
 }
 
 bool adjacent(Graph g, Vertex src, Vertex dest) {
@@ -97,7 +99,12 @@ bool adjacent(Graph g, Vertex src, Vertex dest) {
 AdjList outIncident(Graph g, Vertex v) {
 	//debug
     assert(g != NULL);
-
+    if(v > g->nV){
+        printf("try to access unavaible memory\n");
+        exit(1);
+    }
+    
+    
     if(g->edges[v] != NULL){
         return g->edges[v];
     } 
@@ -108,7 +115,11 @@ AdjList inIncident(Graph g, Vertex v) {
 	 //debug
     assert(g != NULL);
     AdjList list = NULL;
-    
+    if(v > g->nV){
+        printf("try to access unavaible memory\n");
+        exit(1);
+    }
+
     for(int i = 0;i < g->nV;i++){
         AdjList curr = g->edges[i];
         while(curr != NULL){
@@ -139,8 +150,9 @@ void  freeGraph(Graph g) {
  	assert(g != NULL);
     
     for (int i = 0; i < g->nV; i++){
-        AdjList curr = g->edges[i];
-        AdjList tmp;
+        AdjList curr = malloc(sizeof(AdjList));
+        curr = g->edges[i];
+        AdjList tmp = malloc(sizeof(AdjList));
         while(curr != NULL){
             tmp = curr;
             curr = curr->next;
